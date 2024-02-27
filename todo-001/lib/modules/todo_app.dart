@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:todo/models/todo.dart';
 
@@ -60,47 +59,113 @@ class _TodoAppState extends State<TodoApp> {
         /// TodoList가 변화가 되는지 확인
         itemCount: todoList.length,
         itemBuilder: (context, index) {
-          return Material(
-            child: InkWell(
-              highlightColor: Colors.red.withOpacity(0.3),
-              splashColor: Colors.blueAccent.withOpacity(0.3),
-              child: ListTile(
-                /// 한개씩의 리스트를 보여줌
-                title: Row(
-                  children: [
-                    Column(
-                      children: [
-                        Text(
-                          todoList[index].sdate,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        Text(
-                          todoList[index].stime,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 15.0),
-                        child: Text(todoList[index].content,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              color: Colors.blue,
-                            )),
-                      ),
-                    )
-                  ],
+          /// Dismissible == swipe
+          /// 요소를 왼쪽, 오른쪽으로 드래그했을때 화면에서 사라짐
+          /// 요소가 삭제되는건 아니고 가리는것
+          return Dismissible(
+              key: UniqueKey(),
+              background: Container(
+                margin: const EdgeInsets.all(8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                ),
+                color: Colors.green,
+                alignment: Alignment.centerLeft,
+                child: const Icon(
+                  Icons.save_alt_sharp,
+                  size: 36,
+                  color: Colors.white,
                 ),
               ),
-            ),
-          )
+              secondaryBackground: Container(
+                margin: const EdgeInsets.all(8),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                color: Colors.red,
+                alignment: Alignment.centerRight,
+                child: const Icon(
+                  Icons.delete_outline,
+                  size: 36,
+                  color: Colors.white,
+                ),
+              ),
+              child: Material(
+                child: InkWell(
+                  onTap: () => {},
+                  // 길게 클릭했을때
+                  highlightColor: Colors.red.withOpacity(0.3),
+                  // 살짝 클릭했을때
+                  splashColor: Colors.blueAccent.withOpacity(0.3),
+                  child: ListTile(
+                    /// 한개씩의 리스트를 보여줌
+                    title: Row(
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              todoList[index].sdate,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            Text(
+                              todoList[index].stime,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 15.0),
+                            child: Text(todoList[index].content,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.blue,
+                                )),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              /// 사라지기 전에 실행할 Event
+              confirmDismiss: (direction) {
+                if (direction == DismissDirection.endToStart) {
+                  return showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text("삭제할까요?"),
+                        actions: [
+                          ElevatedButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text("예")),
+                          ElevatedButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text("취소"))
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  return Future.value(false);
+                }
+              },
+
+              /// 사라진 후에 실행할 Event
+              onDismissed: (direction) => {
+                    if (direction == DismissDirection.endToStart)
+                      {
+                        setState(() {
+                          todoList.removeAt(index);
+                        })
+                      }
+                  });
         },
       ),
     );
