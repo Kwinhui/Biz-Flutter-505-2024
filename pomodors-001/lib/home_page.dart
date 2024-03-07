@@ -29,6 +29,7 @@ class _HomePageState extends State<HomePage> {
       _timerRun = !_timerRun;
     });
     if (_timerRun) {
+      // periodic : 특정 작업을 반복적으로 수행하도록 예약하는 함수
       _timer = Timer.periodic(
         // 1초에 한번씩 이 함수를 실행하라
         const Duration(seconds: 1),
